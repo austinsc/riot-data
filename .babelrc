@@ -1,3 +1,5 @@
 {
-  "stage": 0
+  "modules": "common",
+  "compact": true,
+  "comments": false
 }

@@ -18,7 +18,6 @@ build/
 bld/
 lib/
 !tools/lib
-[Bb]in/
 [Oo]bj/
 coverage/
 
