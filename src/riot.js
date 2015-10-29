@@ -4,6 +4,7 @@ import mongodb from 'mongodb';
 import utils from './utilities';
 
 
+
 (function () {
   "use strict";
   var db = null;
@@ -428,7 +429,7 @@ import utils from './utilities';
               yield db.collection('matches').insert(matches);
 
           })().then(function () {
-            deferred.resove();
+            deferred.resolve();
           });
 
           regionProcesses.push(deferred.promise);
