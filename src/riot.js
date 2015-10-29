@@ -1,11 +1,57 @@
 import q from 'q';
 import https from 'https';
 import mongodb from 'mongodb';
-import utils from './utilities';
+import request from 'superagent';
+import PromiseMaker from './PromiseMaker';
+import utils, {sleep} from './utilities';
+
+export default class RiotAccess {
+  constructor(config) {
+    this.config = config;
+    const {region} = config;
+    this.host = `${region}.api.pvp.net`;
+    this.teamListApi = `${host}/api/lol/${region}/v2.5/league/{tier}?type=RANKED_TEAM_5x5&api_key=${apiKey}`;
+    this.soloListApi = `${host}/api/lol/${region}/v2.5/league/challenger?type=RANKED_SOLO_5x5&api_key=${apiKey}`;
+    this.teamInfoApi = `${host}/api/lol/${region}/v2.4/team/{teamIdList}?api_key=${apiKey}`;
+    this.matchListApi = `${host}/api/lol/${region}/v2.2/matchlist/by-summoner/{playerId}?rankedQueues=RANKED_SOLO_5x5&startTime={startTime}&api_key=${apiKey}`;
+    this.matchInfoApi = `${host}/api/lol/${region}/v2.2/match/{matchId}?includeTimeline=true&api_key=${apiKey}`;
+    this.pendingRequests = 0;
+  }
+
+  initDatabase() {
+    return new Promise((resolve, reject) => {
+      mongodb.MongoClient.connect(this.config.mongodb, (err, database) => {
+        if(err) {
+          return reject(err);
+        }
+        resolve(this.database = database)
+      });
+    });
+  }
+
+  requestApi(url) {
+    sleep(requestDelay * ++this.pendingRequests)
+      .then(() => {
+        this.pendingRequests--;
+        request
+          .get(url)
+          .use(PromiseMaker)
+          .promise();
+      });
+  }
+
+  start() {
+
+  }
+
+  stop() {
+
+  }
+
+}
 
 
-
-(function () {
+(function() {
   "use strict";
   var db = null;
 
@@ -14,15 +60,15 @@ import utils from './utilities';
     requestDuration = 10 * 60 * 1000, // 10 Minutes
     requestDelay = Math.ceil(1 / (requestCap / requestDuration)), // Required wait time between requests.
     teamInfoLimit = 10, // We can look up 10 teams via the teamInfoApi at a time.
-    regions = [ 'br', 'eune', 'euw', 'kr', 'lan', 'las', 'na', 'oce', 'ru', 'tr' ],
-    tiers = [ 'challenger', 'master' ],
+    regions = ['br', 'eune', 'euw', 'kr', 'lan', 'las', 'na', 'oce', 'ru', 'tr'],
+    tiers = ['challenger', 'master'],
     apiKey = '5f1c0c7d-d474-4b79-8480-a53c9c41ad60',
     host = '{region}.api.pvp.net',
-    teamListApi = '/api/lol/{region}/v2.5/league/{tier}?type=RANKED_TEAM_5x5&api_key=' + apiKey,
-    soloListApi = '/api/lol/{region}/v2.5/league/challenger?type=RANKED_SOLO_5x5&api_key=' + apiKey,
-    teamInfoApi = '/api/lol/{region}/v2.4/team/{teamIdList}?api_key=' + apiKey,
-    matchListApi = '/api/lol/{region}/v2.2/matchlist/by-summoner/{playerId}?rankedQueues=RANKED_SOLO_5x5&startTime={startTime}&api_key=' + apiKey,
-    matchInfoApi = '/api/lol/{region}/v2.2/match/{matchId}?includeTimeline=true&api_key=' + apiKey,
+    teamListApi = '${host}/api/lol/{region}/v2.5/league/{tier}?type=RANKED_TEAM_5x5&api_key=' + apiKey,
+    soloListApi = '${host}/api/lol/{region}/v2.5/league/challenger?type=RANKED_SOLO_5x5&api_key=' + apiKey,
+    teamInfoApi = '${host}/api/lol/{region}/v2.4/team/{teamIdList}?api_key=' + apiKey,
+    matchListApi = '${host}/api/lol/{region}/v2.2/matchlist/by-summoner/{playerId}?rankedQueues=RANKED_SOLO_5x5&startTime={startTime}&api_key=' + apiKey,
+    matchInfoApi = '${host}/api/lol/{region}/v2.2/match/{matchId}?includeTimeline=true&api_key=' + apiKey,
     staticApi = {
       champion: '/api/lol/static-data/{region}/v1.2/champion?champData=all&api_key=' + apiKey,
       item: '/api/lol/static-data/{region}/v1.2/item?itemListData=all&api_key=' + apiKey,
@@ -37,73 +83,53 @@ import utils from './utilities';
     var self = this;
 
     self.pendingRequests = {};
-    regions.forEach(function (region) {
+    regions.forEach(function(region) {
       self.pendingRequests[region] = -1;
     });
   }
 
-  RiotAccess.prototype = (function () {
+  RiotAccess.prototype = (function() {
     var prototype = {};
 
-    prototype.start = function () {
-    };
 
-    prototype.stop = function () {
-    };
-
-    prototype.initDatabase = function () {
-      var deferred = q.defer();
-
-      if (db === null) {
-        q.nfcall(mongodb.MongoClient.connect, 'mongodb://localhost/no-defeat-in-team').then(function (database) {
-          db = database;
-          deferred.resolve();
-        });
-      } else {
-        deferred.reject();
-      }
-
-      return deferred.promise;
-    };
-
-    prototype.requestApi = function (region, headers) {
+    prototype.requestApi = function(region, headers) {
       var self = this,
         deferred = q.defer();
 
-      sleep(requestDelay * ++self.pendingRequests[region]).then(function () {
+      sleep(requestDelay * ++self.pendingRequests[region]).then(function() {
         self.pendingRequests[region]--;
 
         // Time it out if it takes too long.
-        sleep(timeout).then(function () {
-          if (deferred.promise.isPending()) {
+        sleep(timeout).then(function() {
+          if(deferred.promise.isPending()) {
             deferred.reject();
           }
         });
 
-        var req = https.request(headers, function (res) {
+        var req = https.request(headers, function(res) {
           res.setEncoding('utf8');
 
-          if (res.statusCode != 200) {
+          if(res.statusCode != 200) {
             deferred.reject();
             return;
           }
 
           var responseString = '';
 
-          res.on('data', function (data) {
+          res.on('data', function(data) {
             responseString += data;
           });
 
-          res.on('end', function () {
+          res.on('end', function() {
             try {
               deferred.resolve(JSON.parse(responseString));
-            } catch (ex) {
+            } catch(ex) {
               deferred.reject();
             }
           });
         });
 
-        req.on('error', function () {
+        req.on('error', function() {
           deferred.reject();
         });
 
@@ -113,38 +139,38 @@ import utils from './utilities';
       return deferred.promise;
     };
 
-    prototype.requestUnthrottledApi = function (headers) {
+    prototype.requestUnthrottledApi = function(headers) {
       var deferred = q.defer();
 
       // Time it out if it takes too long.
-      sleep(timeout).then(function () {
+      sleep(timeout).then(function() {
         deferred.reject();
       });
 
-      var req = https.request(headers, function (res) {
+      var req = https.request(headers, function(res) {
         res.setEncoding('utf8');
 
-        if (res.statusCode != 200) {
+        if(res.statusCode != 200) {
           deferred.reject();
           return;
         }
 
         var responseString = '';
 
-        res.on('data', function (data) {
+        res.on('data', function(data) {
           responseString += data;
         });
 
-        res.on('end', function () {
+        res.on('end', function() {
           try {
             deferred.resolve(JSON.parse(responseString));
-          } catch (ex) {
+          } catch(ex) {
             deferred.reject();
           }
         });
       });
 
-      req.on('error', function () {
+      req.on('error', function() {
         deferred.reject();
       });
 
@@ -153,7 +179,7 @@ import utils from './utilities';
       return deferred.promise;
     };
 
-    prototype.fetchMatchData = function () {
+    prototype.fetchMatchData = function() {
       var self = this;
 
       return q.async(function *() {
@@ -196,7 +222,7 @@ import utils from './utilities';
 
         var regionProcesses = [];
 
-        for (var i = 0; i < regions.length; i++) {
+        for(var i = 0; i < regions.length; i++) {
           var region = regions[i],
             deferred = q.defer();
 
@@ -206,37 +232,39 @@ import utils from './utilities';
               var calls = [];
 
               var soloQueueTiers = ['challenger'];
-              soloQueueTiers.forEach(function (tier) {
+              soloQueueTiers.forEach(function(tier) {
                 calls.push({
                   deferred: q.defer(),
                   tier: tier
                 });
               });
 
-              calls.forEach(function (call) {
+              calls.forEach(function(call) {
                 self.requestApi(region, {
                   host: host.replace(/{region}/g, region),
                   path: soloListApi.replace(/{region}/g, region).replace(/{tier}/g, call.tier),
                   method: 'GET',
-                  headers: { }
-                }).then(function (league) {
+                  headers: {}
+                }).then(function(league) {
                   var playerIdList = [];
 
-                  league.entries.forEach(function (entry) {
+                  league.entries.forEach(function(entry) {
                     playerIdList.push(entry.playerOrTeamId);
                   });
 
                   call.deferred.resolve(playerIdList);
-                }, function () {
+                }, function() {
                   call.deferred.reject();
                 });
               });
 
-              return (yield q.allSettled(calls.map(function (call) { return call.deferred.promise; }))).filter(function (snapshot) {
-                return snapshot.state === 'fulfilled';
-              }).map(function (snapshot) {
-                return snapshot.value;
-              });
+              return (yield q.allSettled(calls.map(function(call) {
+                return call.deferred.promise;
+              }))).filter(function(snapshot) {
+                  return snapshot.state === 'fulfilled';
+                }).map(function(snapshot) {
+                  return snapshot.value;
+                });
             })();
 
             playerIds = [].concat.apply([], playerIds);
@@ -245,37 +273,39 @@ import utils from './utilities';
             var teamIds = yield q.async(function *() {
               var calls = [];
 
-              tiers.forEach(function (tier) {
+              tiers.forEach(function(tier) {
                 calls.push({
                   deferred: q.defer(),
                   tier: tier
                 });
               });
 
-              calls.forEach(function (call) {
+              calls.forEach(function(call) {
                 self.requestApi(region, {
                   host: host.replace(/{region}/g, region),
                   path: teamListApi.replace(/{region}/g, region).replace(/{tier}/g, call.tier),
                   method: 'GET',
-                  headers: { }
-                }).then(function (league) {
+                  headers: {}
+                }).then(function(league) {
                   var teamIds = [];
 
-                  league.entries.forEach(function (entry) {
+                  league.entries.forEach(function(entry) {
                     teamIds.push(entry.playerOrTeamId);
                   });
 
                   call.deferred.resolve(teamIds);
-                }, function () {
+                }, function() {
                   call.deferred.reject();
                 });
               });
 
-              return (yield q.allSettled(calls.map(function (call) { return call.deferred.promise; }))).filter(function (snapshot) {
-                return snapshot.state === 'fulfilled';
-              }).map(function (snapshot) {
-                return snapshot.value;
-              });
+              return (yield q.allSettled(calls.map(function(call) {
+                return call.deferred.promise;
+              }))).filter(function(snapshot) {
+                  return snapshot.state === 'fulfilled';
+                }).map(function(snapshot) {
+                  return snapshot.value;
+                });
             })();
 
             teamIds = [].concat.apply([], teamIds);
@@ -283,53 +313,55 @@ import utils from './utilities';
             var teamIdLists = [],
               teamIdSubList = [];
 
-            teamIds.forEach(function (teamId) {
+            teamIds.forEach(function(teamId) {
               teamIdSubList.push(teamId);
 
-              if (teamIdSubList.length === teamInfoLimit) {
+              if(teamIdSubList.length === teamInfoLimit) {
                 teamIdLists.push(teamIdSubList);
                 teamIdSubList = [];
               }
             });
 
-            if (teamIdSubList.length)
+            if(teamIdSubList.length)
               teamIdLists.push(teamIdSubList);
 
             // C
             var soloMatchIds = yield q.async(function *() {
               var calls = [];
 
-              playerIds.forEach(function (playerId) {
+              playerIds.forEach(function(playerId) {
                 calls.push({
                   deferred: q.defer(),
                   playerId: playerId
                 });
               });
 
-              calls.forEach(function (call) {
+              calls.forEach(function(call) {
                 self.requestApi(region, {
                   host: host.replace(/{region}/g, region),
                   path: matchListApi.replace(/{region}/g, region).replace(/{playerId}/g, call.playerId).replace(/{startTime}/g, (new Date()).getTime() - 1000 * 60 * 60 * 24 * 30),
                   method: 'GET',
-                  headers: { }
-                }).then(function (matchList) {
+                  headers: {}
+                }).then(function(matchList) {
                   var matchIdList = [];
 
-                  matchList.matches.forEach(function (match) {
+                  matchList.matches.forEach(function(match) {
                     matchIdList.push(match.matchId);
                   });
 
                   call.deferred.resolve(matchIdList);
-                }, function () {
+                }, function() {
                   call.deferred.reject();
                 });
               });
 
-              return (yield q.allSettled(calls.map(function (call) { return call.deferred.promise; }))).filter(function (snapshot) {
-                return snapshot.state === 'fulfilled';
-              }).map(function (snapshot) {
-                return snapshot.value;
-              });
+              return (yield q.allSettled(calls.map(function(call) {
+                return call.deferred.promise;
+              }))).filter(function(snapshot) {
+                  return snapshot.state === 'fulfilled';
+                }).map(function(snapshot) {
+                  return snapshot.value;
+                });
             })();
 
             soloMatchIds = [].concat.apply([], soloMatchIds);
@@ -338,97 +370,101 @@ import utils from './utilities';
             var teamMatchIds = yield q.async(function *() {
               var calls = [];
 
-              teamIdLists.forEach(function (teamIdList) {
+              teamIdLists.forEach(function(teamIdList) {
                 calls.push({
                   deferred: q.defer(),
                   teamIdList: teamIdList
                 });
               });
 
-              calls.forEach(function (call) {
+              calls.forEach(function(call) {
                 self.requestApi(region, {
                   host: host.replace(/{region}/g, region),
                   path: teamInfoApi.replace(/{region}/g, region).replace(/{teamIdList}/g, call.teamIdList),
                   method: 'GET',
-                  headers: { }
-                }).then(function (teams) {
+                  headers: {}
+                }).then(function(teams) {
                   var matchIdList = [];
 
-                  Object.keys(teams).forEach(function (teamId) {
-                    teams[teamId].matchHistory.forEach(function (match) {
+                  Object.keys(teams).forEach(function(teamId) {
+                    teams[teamId].matchHistory.forEach(function(match) {
                       matchIdList.push(match.gameId);
                     });
                   });
 
                   call.deferred.resolve(matchIdList);
-                }, function () {
+                }, function() {
                   call.deferred.reject();
                 });
               });
 
-              return (yield q.allSettled(calls.map(function (call) { return call.deferred.promise; }))).filter(function (snapshot) {
-                return snapshot.state === 'fulfilled';
-              }).map(function (snapshot) {
-                return snapshot.value;
-              });
+              return (yield q.allSettled(calls.map(function(call) {
+                return call.deferred.promise;
+              }))).filter(function(snapshot) {
+                  return snapshot.state === 'fulfilled';
+                }).map(function(snapshot) {
+                  return snapshot.value;
+                });
             })();
 
             teamMatchIds = [].concat.apply([], teamMatchIds);
 
             var matchIds = soloMatchIds.concat(teamMatchIds);
-            matchIds = matchIds.filter(function (matchId, j, arr) {
+            matchIds = matchIds.filter(function(matchId, j, arr) {
               return matchIds.indexOf(matchId) == j;
             });
 
-            yield q.all(matchIds.map(function (matchId, j) {
-              return db.collection('matches').count({ matchId: matchId, region: region.toUpperCase() }).then(function (count) {
-                if (count)
+            yield q.all(matchIds.map(function(matchId, j) {
+              return db.collection('matches').count({matchId: matchId, region: region.toUpperCase()}).then(function(count) {
+                if(count)
                   matchIds[j] = -1;
               });
-            })).then(function () {
-              matchIds = matchIds.filter(function (matchId) {
+            })).then(function() {
+              matchIds = matchIds.filter(function(matchId) {
                 return matchId !== -1;
               });
             });
 
-            if (matchIds.length > 200)
+            if(matchIds.length > 200)
               matchIds = matchIds.slice(0, 200);
 
             // E
             var matches = yield q.async(function *() {
               var calls = [];
 
-              matchIds.forEach(function (matchId) {
+              matchIds.forEach(function(matchId) {
                 calls.push({
                   deferred: q.defer(),
                   matchId: matchId
                 });
               });
 
-              calls.forEach(function (call) {
+              calls.forEach(function(call) {
                 self.requestApi(region, {
                   host: host.replace(/{region}/g, region),
                   path: matchInfoApi.replace(/{region}/g, region).replace(/{matchId}/g, call.matchId),
                   method: 'GET',
-                  headers: { }
-                }).then(function (match) {
+                  headers: {}
+                }).then(function(match) {
                   call.deferred.resolve(match);
-                }, function () {
+                }, function() {
                   call.deferred.reject();
                 });
               });
 
-              return (yield q.allSettled(calls.map(function (call) { return call.deferred.promise; }))).filter(function (snapshot) {
-                return snapshot.state === 'fulfilled';
-              }).map(function (snapshot) {
-                return snapshot.value;
-              });
+              return (yield q.allSettled(calls.map(function(call) {
+                return call.deferred.promise;
+              }))).filter(function(snapshot) {
+                  return snapshot.state === 'fulfilled';
+                }).map(function(snapshot) {
+                  return snapshot.value;
+                });
             })();
 
-            if (matches.length)
+            if(matches.length)
               yield db.collection('matches').insert(matches);
 
-          })().then(function () {
+          })().then(function() {
             deferred.resolve();
           });
 
@@ -439,7 +475,7 @@ import utils from './utilities';
       })();
     };
 
-    prototype.fetchStaticData = function (region) {
+    prototype.fetchStaticData = function(region) {
       var self = this;
 
       return q.async(function *() {
@@ -462,9 +498,9 @@ import utils from './utilities';
             host: host.replace(/{region}/g, region),
             path: staticApi.champion.replace(/{region}/g, region),
             method: 'GET',
-            headers: { }
-          }).then(function (champions) {
-            db.collection('champions').insert(utils.objValues(champions.data)).then(function () {
+            headers: {}
+          }).then(function(champions) {
+            db.collection('champions').insert(utils.objValues(champions.data)).then(function() {
               deferred.resolve();
             });
           });
@@ -479,9 +515,9 @@ import utils from './utilities';
             host: host.replace(/{region}/g, region),
             path: staticApi.item.replace(/{region}/g, region),
             method: 'GET',
-            headers: { }
-          }).then(function (items) {
-            db.collection('items').insert(utils.objValues(items.data)).then(function () {
+            headers: {}
+          }).then(function(items) {
+            db.collection('items').insert(utils.objValues(items.data)).then(function() {
               deferred.resolve();
             });
           });
@@ -496,9 +532,9 @@ import utils from './utilities';
             host: host.replace(/{region}/g, region),
             path: staticApi.map.replace(/{region}/g, region),
             method: 'GET',
-            headers: { }
-          }).then(function (maps) {
-            db.collection('maps').insert(utils.objValues(maps.data)).then(function () {
+            headers: {}
+          }).then(function(maps) {
+            db.collection('maps').insert(utils.objValues(maps.data)).then(function() {
               deferred.resolve();
             });
           });
@@ -513,9 +549,9 @@ import utils from './utilities';
             host: host.replace(/{region}/g, region),
             path: staticApi.mastery.replace(/{region}/g, region),
             method: 'GET',
-            headers: { }
-          }).then(function (masteries) {
-            db.collection('masteries').insert(utils.objValues(masteries.data)).then(function () {
+            headers: {}
+          }).then(function(masteries) {
+            db.collection('masteries').insert(utils.objValues(masteries.data)).then(function() {
               deferred.resolve();
             });
           });
@@ -530,9 +566,9 @@ import utils from './utilities';
             host: host.replace(/{region}/g, region),
             path: staticApi.rune.replace(/{region}/g, region),
             method: 'GET',
-            headers: { }
-          }).then(function (runes) {
-            db.collection('runes').insert(utils.objValues(runes.data)).then(function () {
+            headers: {}
+          }).then(function(runes) {
+            db.collection('runes').insert(utils.objValues(runes.data)).then(function() {
               deferred.resolve();
             });
           });
@@ -547,9 +583,9 @@ import utils from './utilities';
             host: host.replace(/{region}/g, region),
             path: staticApi.summonerSpell.replace(/{region}/g, region),
             method: 'GET',
-            headers: { }
-          }).then(function (summonerSpells) {
-            db.collection('summonerSpells').insert(utils.objValues(summonerSpells.data)).then(function () {
+            headers: {}
+          }).then(function(summonerSpells) {
+            db.collection('summonerSpells').insert(utils.objValues(summonerSpells.data)).then(function() {
               deferred.resolve();
             });
           });
@@ -564,11 +600,13 @@ import utils from './utilities';
             host: host.replace(/{region}/g, region),
             path: staticApi.versions.replace(/{region}/g, region),
             method: 'GET',
-            headers: { }
-          }).then(function (versions) {
+            headers: {}
+          }).then(function(versions) {
             // Convert string[] to object[] with definition { version: <value> }
-            versions = versions.map(function (version) { return { version: version }; });
-            db.collection('versions').insert(versions).then(function () {
+            versions = versions.map(function(version) {
+              return {version: version};
+            });
+            db.collection('versions').insert(versions).then(function() {
               deferred.resolve();
             });
           });
@@ -578,13 +616,6 @@ import utils from './utilities';
       })();
     };
 
-    function sleep(millis) {
-      var deferred = q.defer();
-      setTimeout(function () {
-        deferred.resolve();
-      }, millis);
-      return deferred.promise;
-    }
 
     return prototype;
   })();

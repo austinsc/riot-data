@@ -21,7 +21,11 @@
     "rc": "^1.1.2"
   },
   "devDependencies": {
-    "babel": "^5.8.29",
     "babel-cli": "^6.0.2"
+  },
+  "babel": {
+    "modules": "common",
+    "compact": true,
+    "comments": false
   }
 }
