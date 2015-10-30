@@ -50,7 +50,7 @@ export default class RiotAccess {
 
 }
 
-
+/*
 (function() {
   "use strict";
   var db = null;
@@ -623,3 +623,4 @@ export default class RiotAccess {
   module.exports = RiotAccess;
 
 })();
+  */
