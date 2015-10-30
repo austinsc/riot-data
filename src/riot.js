@@ -1,26 +1,55 @@
-import q from 'q';
+import Q from 'q';
 import https from 'https';
 import mongodb from 'mongodb';
-import request from 'superagent';
-import PromiseMaker from './PromiseMaker';
-import utils, {sleep} from './utilities';
+import lolapi from 'lolapi';
+import {inspect} from 'util';
+
+
+// A
+// CALL 1: Solo queue challenger.
+// WAIT FOR 1 TO COMPLETE
+
+// B
+// CALL 2: Team list challenger.
+// CALL 3: Team list master.
+// WAIT FOR 2 & 3 TO COMPLETE
+// Compile lists of teamIds - [teamInfoLimit] ids at a time.
+
+// C
+// CALL 4: Solo queue matchlist playerIds[0].
+// CALL 5: Solo queue matchlist playerIds[1].
+// ...
+// CALL M: Solo queue matchlist playerIds[playerIds.length-1].
+// WAIT FOR 4 - M TO COMPLETE
+
+// D
+// CALL M+1: Team info teamIdsLists[0].
+// CALL M+2: Team info teamIdsLists[1].
+// ...
+// CALL N: Team info teamIdsLists[teamIdsLists.length-1].
+// WIAT FOR M+1 - N TO COMPLETE
+
+// Compile list of matchIds.
+// Filter out any ids previously requested: db.any(record.matchId == matchId).
+
+// E
+// CALL N+1: Match info matchIds[0].
+// CALL N+2: Match info matchIds[1].
+// ...
+// CALL K: Match info matchIds[matchIds.length-1].
+// WAIT FOR N+1 - K TO COMPLETE
+// Store match info in database.
 
 export default class RiotAccess {
   constructor(config) {
-    this.config = config;
-    const {region} = config;
-    this.host = `${region}.api.pvp.net`;
-    this.teamListApi = `${host}/api/lol/${region}/v2.5/league/{tier}?type=RANKED_TEAM_5x5&api_key=${apiKey}`;
-    this.soloListApi = `${host}/api/lol/${region}/v2.5/league/challenger?type=RANKED_SOLO_5x5&api_key=${apiKey}`;
-    this.teamInfoApi = `${host}/api/lol/${region}/v2.4/team/{teamIdList}?api_key=${apiKey}`;
-    this.matchListApi = `${host}/api/lol/${region}/v2.2/matchlist/by-summoner/{playerId}?rankedQueues=RANKED_SOLO_5x5&startTime={startTime}&api_key=${apiKey}`;
-    this.matchInfoApi = `${host}/api/lol/${region}/v2.2/match/{matchId}?includeTimeline=true&api_key=${apiKey}`;
-    this.pendingRequests = 0;
+    const {apikey, region, mongodb} = config;
+    this.api = lolapi(apikey, region);
+    this.mongodb = mongodb;
   }
 
   initDatabase() {
     return new Promise((resolve, reject) => {
-      mongodb.MongoClient.connect(this.config.mongodb, (err, database) => {
+      mongodb.MongoClient.connect(this.mongodb, (err, database) => {
         if(err) {
           return reject(err);
         }
@@ -29,19 +58,10 @@ export default class RiotAccess {
     });
   }
 
-  requestApi(url) {
-    sleep(requestDelay * ++this.pendingRequests)
-      .then(() => {
-        this.pendingRequests--;
-        request
-          .get(url)
-          .use(PromiseMaker)
-          .promise();
-      });
-  }
-
   start() {
-
+    return this.initDatabase()
+      .then(() => Q.nfcall(this.api.League.getChallenger, 'RANKED_TEAM_5x5'))
+      .then(data => console.log(inspect(data)));
   }
 
   stop() {

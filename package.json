@@ -13,12 +13,12 @@
   "license": "MIT",
   "dependencies": {
     "logdown": "^1.2.4",
+    "lolapi": "^0.2.4",
     "mongodb": "^2.0.47",
     "optimist": "^0.6.1",
     "progress": "^1.1.8",
     "q": "^1.4.1",
-    "rc": "^1.1.2",
-    "superagent": "^1.4.0"
+    "rc": "^1.1.2"
   },
   "devDependencies": {
     "babel": "^5.8.29"

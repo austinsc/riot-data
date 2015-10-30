@@ -1,15 +1,21 @@
 import q from 'q';
 import rc from 'rc';
 import optimist from 'optimist';
-import defaults from './defaults';
+import {region, apikey, mongodb} from './defaults';
 import RiotAccess from './riot';
 
 const argv = optimist
-  .usage('Count the lines in a file.\nUsage: $0')
-  .describe('f', 'Load a file').alias('f', 'file')
+  .usage('Run the data mining service.')
+  .describe('r', 'Region to mine').alias('r', 'region')
+  .describe('k', 'Riot API key').alias('k', 'apikey')
+  .describe('m', 'MongoDB connection string').alias('m', 'mongodb')
   .argv;
 
-const config = rc('riot-data', defaults, argv);
+const config = rc('riot-data', {region, apikey, mongodb}, argv);
+
+var rito = new RiotAccess(config);
+rito.start()
+  .then(() => process.exit(0));
 
 //q.async(function *() {
 //  var riotAccess = new RiotAccess();
