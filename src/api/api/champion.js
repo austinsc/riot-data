@@ -1,26 +1,22 @@
-import config from '../config';
-import {exec} from '../util';
+import {CHAMPION_ID, CHAMPION_LIST} from '../../Constants';
 
-export default function (region) {
-  return {
-    get(championId, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.CHAMPION_ID;
-      options.id = championId;
-
-      return exec(options);
-    },
-
-    getAll(options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.CHAMPION_LIST;
-      options.query = {
+export const Champion = {
+  get(championId, options) {
+    return Object.assign({}, options, {
+      id: championId,
+      uri: CHAMPION_ID,
+      query: {
         freeToPlay: options.freeToPlay || false
-      };
+      }
+    });
+  },
 
-      return exec(options);
-    }
-  };
+  getAll(options) {
+    return Object.assign({}, options, {
+      uri: CHAMPION_LIST,
+      query: {
+        freeToPlay: options.freeToPlay || false
+      }
+    });
+  }
 };

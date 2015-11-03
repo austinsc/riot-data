@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Q from 'q';
 import https from 'https';
 import mongodb from 'mongodb';
-import lolapi from './api/lolapi';
+import Api from './api/lolapi';
 import {inspect} from 'util';
 import prettyjson from 'prettyjson';
 
@@ -47,11 +47,12 @@ function _print(data) {
 // WAIT FOR N+1 - K TO COMPLETE
 // Store match info in database.
 
-export default class RiotAccess {
+export default class RiotAccess extends Api {
   constructor(config) {
-    const {apikey, region, mongodb} = config;
-    this.api = lolapi(apikey, region);
-    this.mongodb = mongodb;
+    super(config);
+    //const {apikey, region, mongodb} = config;
+    //this.api = lolapi(apikey, region);
+    //this.mongodb = mongodb;
   }
 
   initDatabase() {
@@ -71,7 +72,7 @@ export default class RiotAccess {
     //  .then(_print)
     //  .then(data => Q.all(data.entries.filter((x, i) => i < 5).map(x => Q.nfcall(this.api.Team.get, x.playerOrTeamId))))
     //  .then(_print);
-    return new Promise((resolve) => this.api.Team.get('TEAM-ba6b55b0-d284-11e4-971b-c81f66ddabda', {}, resolve))
+    return this.Team.get('TEAM-ba6b55b0-d284-11e4-971b-c81f66ddabda')
       .then(_print);
 
   }

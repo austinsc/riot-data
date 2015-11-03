@@ -1,17 +1,12 @@
-import config from '../config';
-import {exec} from '../util';
+import {API_CHALLENGE} from '../../Constants';
 
-export default function (region) {
-  return {
-    get(timestamp, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.API_CHALLENGE;
-      options.query = {
+export const ApiChallenge = {
+  get(timestamp, options = {}) {
+    return Object.assign({}, options, {
+      uri: API_CHALLENGE,
+      query: {
         beginDate: timestamp
-      };
-
-      return exec(options);
-    }
-  };
+      }
+    });
+  }
 };

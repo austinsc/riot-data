@@ -1,33 +1,17 @@
-import config from '../config';
-import {exec} from '../util';
+import {TEAM_ID, TEAM_BY_SUMMONER} from '../../Constants';
 
-export default function (region) {
-  return {
-    get(teamId, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.TEAM_ID;
-      options.id = teamId;
+export const Team = {
+  get(teamId, options = {}) {
+    return Object.assign({}, options, {
+      id: teamId,
+      uri: TEAM_ID
+    });
+  },
 
-      return exec(options);
-    },
-
-    getByTeamId(teamId, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.TEAM_ID;
-      options.id = teamId;
-
-      return exec(options);
-    },
-
-    getBySummonerId(summonerId, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.TEAM_BY_SUMMONER;
-      options.id = summonerId;
-
-      return exec(options);
-    }
-  };
+  getBySummonerId(summonerId, options = {}) {
+    return Object.assign({}, options, {
+      id: summonerId,
+      uri: TEAM_BY_SUMMONER
+    });
+  }
 };

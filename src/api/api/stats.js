@@ -1,30 +1,23 @@
-import config from '../config';
-import {exec} from '../util';
+import {RANKED_STATS, STAT_SUMMARY} from '../../Constants';
 
-export default function (region) {
-  return {
-    getRanked(summonerId, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.RANKED_STATS;
-      options.id = summonerId;
-      options.query = {
+export const Stats = {
+  getRanked(summonerId, options = {}) {
+    return Object.assign({}, options, {
+      id: summonerId,
+      uri: RANKED_STATS,
+      query: {
         season: options.season || null
-      };
+      }
+    });
+  },
 
-      return exec(options);
-    },
-
-    getSummary(summonerId, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.STAT_SUMMARY;
-      options.id = summonerId;
-      options.query = {
+  getSummary(summonerId, options = {}) {
+    return Object.assign({}, options, {
+      id: summonerId,
+      uri: STAT_SUMMARY,
+      query: {
         season: options.season || null
-      };
-
-      return exec(options);
-    }
-  };
+      }
+    });
+  }
 };

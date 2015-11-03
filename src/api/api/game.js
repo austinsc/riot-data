@@ -1,15 +1,10 @@
-import config from '../config';
-import {exec} from '../util';
+import {RECENT_GAMES} from '../../Constants';
 
-export default function (region) {
-  return {
-    getBySummonerId(summonerId, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.RECENT_GAMES;
-      options.id = summonerId;
-
-      return exec(options);
-    }
-  };
+export const Game = {
+  getBySummonerId(summonerId, options) {
+    return Object.assign({}, options, {
+      uri: RECENT_GAMES,
+      id: summonerId
+    });
+  }
 };

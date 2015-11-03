@@ -1,27 +1,20 @@
-import config from '../config';
-import {exec} from '../util';
+import {STATUS_SHARD_ID, STATUS_SHARD_LIST} from '../../Constants';
 
-export default function (region) {
-  return {
-    get(shardName, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.STATUS_SHARD_ID;
-      options.names = shardName;
-      options.useHttp = true;
-      options.host = 'http://status.leagueoflegends.com';
+export const Status = {
+  get(shardName, options = {}) {
+    return Object.assign({}, options, {
+      names: shardName,
+      uri: STATUS_SHARD_ID,
+      host: 'http://status.leagueoflegends.com',
+      useHttp: true
+    });
+  },
 
-      return exec(options);
-    },
-
-    getAll(options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.STATUS_SHARD_LIST;
-      options.useHttp = true;
-      options.host = 'http://status.leagueoflegends.com';
-
-      return exec(options);
-    }
-  };
+  getAll(options = {}) {
+    return Object.assign({}, options, {
+      uri: STATUS_SHARD_LIST,
+      host: 'http://status.leagueoflegends.com',
+      useHttp: true
+    });
+  }
 };

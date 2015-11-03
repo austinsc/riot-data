@@ -1,51 +1,38 @@
-import config from '../config';
-import {exec} from '../util';
+import {SUMMONER_ID, SUMMONER_BY_NAME, SUMMONER_NAME, SUMMONER_RUNES, SUMMONER_MASTERIES} from '../../Constants';
 
-export default function (region) {
-  return {
-    get(summonerIds, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.SUMMONER_ID;
-      options.id = summonerIds;
+export const Summoner = {
+  get(summonerIds, options = {}) {
+    return Object.assign({}, options, {
+      id: summonerIds,
+      uri: SUMMONER_ID
+    });
+  },
 
-      return exec(options);
-    },
+  getByName(summonerNames, options = {}) {
+    return Object.assign({}, options, {
+      uri: SUMMONER_BY_NAME,
+      names: summonerNames instanceof Array ? summonerNames.join() : summonerNames
+    });
+  },
 
-    getByName(summonerNames, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.SUMMONER_BY_NAME;
-      options.names = summonerNames instanceof Array ? summonerNames.join() : summonerNames;
+  getName(summonerIds, options = {}) {
+    return Object.assign({}, options, {
+      id: summonerIds,
+      uri: SUMMONER_NAME
+    });
+  },
 
-      return exec(options);
-    },
+  getRunes(summonerIds, options = {}) {
+    return Object.assign({}, options, {
+      id: summonerIds,
+      uri: SUMMONER_RUNES
+    });
+  },
 
-    getName(summonerIds, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.SUMMONER_NAME;
-      options.id = summonerIds;
-
-      return exec(options);
-    },
-
-    getRunes(summonerIds, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.SUMMONER_RUNES;
-      options.id = summonerIds;
-
-      return exec(options);
-    },
-
-    getMasteries(summonerIds, options) {
-      options = options || {};
-      options.region = options.region || region || config.defaultRegion;
-      options.uri = config.uri.SUMMONER_MASTERIES;
-      options.id = summonerIds;
-
-      return exec(options);
-    }
-  };
+  getMasteries(summonerIds, options = {}) {
+    return Object.assign({}, options, {
+      id: summonerIds,
+      uri: SUMMONER_MASTERIES
+    });
+  }
 };
