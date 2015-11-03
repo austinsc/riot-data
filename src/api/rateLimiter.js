@@ -1,5 +1,3 @@
-'use strict';
-
 var RateLimiter = function (maxOps, interval, allowBursts) {
   this._maxRate = allowBursts ? maxOps : maxOps / interval;
   this._interval = interval;

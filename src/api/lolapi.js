@@ -1,4 +1,4 @@
-module.exports = function (apiKey, region, options) {
+export default function (apiKey, region, options) {
   'use strict';
 
   var config = require('./config');

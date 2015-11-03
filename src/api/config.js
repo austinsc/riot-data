@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   defaultRegion: 'euw',
   defaultLimitPer10s: 10,
   defaultLimitPer10min: 500,
@@ -67,4 +67,4 @@ module.exports = {
     TEAM_BY_SUMMONER: '/{string:region}/v2.4/team/by-summoner/{int:id}',
     TEAM_ID: '/{string:region}/v2.4/team/{string:id}'
   }
-}
+};

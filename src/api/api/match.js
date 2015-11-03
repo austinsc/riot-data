@@ -1,4 +1,4 @@
-module.exports = function (region) {
+export default function (region) {
   'use strict';
 
   var config = require('../config');
