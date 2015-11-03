@@ -1,5 +1,5 @@
 export default {
-  defaultRegion: 'euw',
+  defaultRegion: 'na',
   defaultLimitPer10s: 10,
   defaultLimitPer10min: 500,
   defaultTTL: 3600,

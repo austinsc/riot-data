@@ -1,16 +1,9 @@
+import config from '../config';
+import {exec} from '../util';
+
 export default function (region) {
-  'use strict';
-
-  var config = require('../config');
-  var util = require('../util');
-
   return {
-    getBySummonerId: function (summonerId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    getBySummonerId(summonerId, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.MATCH_HISTORY;
@@ -22,8 +15,7 @@ export default function (region) {
         endIndex: options.endIndex || null
       };
 
-      util.exec(options, callback);
+      return exec(options);
     }
   };
-
 };

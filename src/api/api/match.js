@@ -1,3 +1,4 @@
+import _ from 'lodash';
 export default function (region) {
   'use strict';
 
@@ -5,8 +6,8 @@ export default function (region) {
   var util = require('../util');
 
   return {
-    get: function (matchId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
+    get(matchId, options, callback) {
+      if (arguments.length === 2 && _.isFunction(options)) {
         callback = arguments[1];
         options = null;
       }
@@ -19,7 +20,7 @@ export default function (region) {
         includeTimeline: options.includeTimeline || false
       };
 
-      util.exec(options, callback);
+      return exec(options);
     }
   };
 

@@ -1,30 +1,18 @@
+import config from '../config';
+import {exec} from '../util';
+
 export default function (region) {
-  'use strict';
-
-  var config = require('../config');
-  var util = require('../util');
-
   return {
-    get: function (championId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    get(championId, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.CHAMPION_ID;
       options.id = championId;
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getAll: function (options, callback) {
-      if (arguments.length === 1 && typeof options === 'function') {
-        callback = arguments[0];
-        options = null;
-      }
-
+    getAll(options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.CHAMPION_LIST;
@@ -32,8 +20,7 @@ export default function (region) {
         freeToPlay: options.freeToPlay || false
       };
 
-      util.exec(options, callback);
+      return exec(options);
     }
   };
-
 };

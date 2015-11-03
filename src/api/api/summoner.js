@@ -1,81 +1,51 @@
+import config from '../config';
+import {exec} from '../util';
+
 export default function (region) {
-  'use strict';
-
-  var config = require('../config');
-  var util = require('../util');
-
   return {
-    get: function (summonerIds, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    get(summonerIds, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.SUMMONER_ID;
       options.id = summonerIds;
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getByName: function (summonerNames, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    getByName(summonerNames, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.SUMMONER_BY_NAME;
       options.names = summonerNames instanceof Array ? summonerNames.join() : summonerNames;
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getName: function (summonerIds, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    getName(summonerIds, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.SUMMONER_NAME;
       options.id = summonerIds;
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getRunes: function (summonerIds, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    getRunes(summonerIds, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.SUMMONER_RUNES;
       options.id = summonerIds;
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getMasteries: function (summonerIds, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    getMasteries(summonerIds, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.SUMMONER_MASTERIES;
       options.id = summonerIds;
 
-      util.exec(options, callback);
-    },
-
-
+      return exec(options);
+    }
   };
-
 };

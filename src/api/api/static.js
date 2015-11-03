@@ -1,16 +1,9 @@
-export default function (region) {
-  'use strict';
+import config from '../config';
+import {exec} from '../util';
 
-  var config = require('../config');
-  var util = require('../util');
-
+export default function(region) {
   return {
-    getChampions: function (options, callback) {
-      if (arguments.length === 1 && typeof options === 'function') {
-        callback = arguments[0];
-        options = null;
-      }
-
+    getChampions(options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATIC_CHAMPION;
@@ -22,15 +15,10 @@ export default function (region) {
         champData: options.champData instanceof Array ? options.champData.join() : options.champData || null
       };
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getChampion: function (championId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    getChampion(championId, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATIC_CHAMPION_ID;
@@ -42,15 +30,10 @@ export default function (region) {
         champData: options.champData instanceof Array ? options.champData.join() : options.champData || null
       };
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getItems: function (options, callback) {
-      if (arguments.length === 1 && typeof options === 'function') {
-        callback = arguments[0];
-        options = null;
-      }
-
+    getItems(options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATIC_ITEM;
@@ -61,15 +44,10 @@ export default function (region) {
         itemListData: options.itemListData instanceof Array ? options.itemListData.join() : options.itemListData || null
       };
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getItem: function (itemId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    getItem(itemId, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATIC_ITEM_ID;
@@ -81,15 +59,10 @@ export default function (region) {
         itemData: options.itemData instanceof Array ? options.itemData.join() : options.itemData || null
       };
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getMasteries: function (options, callback) {
-      if (arguments.length === 1 && typeof options === 'function') {
-        callback = arguments[0];
-        options = null;
-      }
-
+    getMasteries(options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATIC_MASTERY;
@@ -100,15 +73,10 @@ export default function (region) {
         masteryListData: options.masteryListData instanceof Array ? options.masteryListData.join() : options.masteryListData || null
       };
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getMastery: function (masteryId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    getMastery(masteryId, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATIC_MASTERY_ID;
@@ -120,15 +88,10 @@ export default function (region) {
         masteryData: options.masteryData instanceof Array ? options.masteryData.join() : options.masteryData || null
       };
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getRunes: function (options, callback) {
-      if (arguments.length === 1 && typeof options === 'function') {
-        callback = arguments[0];
-        options = null;
-      }
-
+    getRunes(options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATIC_RUNE;
@@ -139,15 +102,10 @@ export default function (region) {
         runeListData: options.runeListData instanceof Array ? options.runeListData.join() : options.runeListData || null
       };
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getRune: function (runeId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    getRune(runeId, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATIC_RUNE_ID;
@@ -159,15 +117,10 @@ export default function (region) {
         runeData: options.runeData instanceof Array ? options.runeData.join() : options.runeData || null
       };
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getSummonerSpells: function (options, callback) {
-      if (arguments.length === 1 && typeof options === 'function') {
-        callback = arguments[0];
-        options = null;
-      }
-
+    getSummonerSpells(options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATIC_SUMMONER_SPELL;
@@ -179,15 +132,10 @@ export default function (region) {
         spellData: options.spellData instanceof Array ? options.spellData.join() : options.spellData || null
       };
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getSummonerSpell: function (summonerSpellId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    getSummonerSpell(summonerSpellId, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATIC_SUMMONER_SPELL_ID;
@@ -199,36 +147,25 @@ export default function (region) {
         spellData: options.spellData instanceof Array ? options.spellData.join() : options.spellData || null
       };
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getRealm: function (options, callback) {
-      if (arguments.length === 1 && typeof options === 'function') {
-        callback = arguments[0];
-        options = null;
-      }
-
+    getRealm(options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATIC_REALM;
       options.static = true;
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getVersions: function (options, callback) {
-      if (arguments.length === 1 && typeof options === 'function') {
-        callback = arguments[0];
-        options = null;
-      }
-
+    getVersions(options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATIC_VERSIONS;
       options.static = true;
 
-      util.exec(options, callback);
+      return exec(options);
     }
   };
-
 };

@@ -1,16 +1,9 @@
+import config from '../config';
+import {exec} from '../util';
+
 export default function (region) {
-  'use strict';
-
-  var config = require('../config');
-  var util = require('../util');
-
   return {
-    get: function (timestamp, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    get(timestamp, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.API_CHALLENGE;
@@ -18,8 +11,7 @@ export default function (region) {
         beginDate: timestamp
       };
 
-      util.exec(options, callback);
+      return exec(options);
     }
   };
-
 };

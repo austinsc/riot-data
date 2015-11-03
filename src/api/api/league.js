@@ -1,3 +1,4 @@
+import _ from 'lodash';
 export default function (region) {
   'use strict';
 
@@ -5,8 +6,8 @@ export default function (region) {
   var util = require('../util');
 
   return {
-    getBySummonerId: function (summonerId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
+    getBySummonerId(summonerId, options, callback) {
+      if (arguments.length === 2 && _.isFunction(options)) {
         callback = arguments[1];
         options = null;
       }
@@ -16,11 +17,11 @@ export default function (region) {
       options.uri = config.uri.LEAGUE_BY_SUMMONER_FULL;
       options.id = summonerId;
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getEntriesBySummonerId: function (summonerId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
+    getEntriesBySummonerId(summonerId, options, callback) {
+      if (arguments.length === 2 && _.isFunction(options)) {
         callback = arguments[1];
         options = null;
       }
@@ -30,11 +31,11 @@ export default function (region) {
       options.uri = config.uri.LEAGUE_BY_SUMMONER;
       options.id = summonerId;
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getByTeamId: function (teamId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
+    getByTeamId(teamId, options, callback) {
+      if (arguments.length === 2 && _.isFunction(options)) {
         callback = arguments[1];
         options = null;
       }
@@ -44,11 +45,11 @@ export default function (region) {
       options.uri = config.uri.LEAGUE_BY_TEAM_FULL;
       options.id = teamId;
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getEntriesByTeamId: function (teamId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
+    getEntriesByTeamId(teamId, options, callback) {
+      if (arguments.length === 2 && _.isFunction(options)) {
         callback = arguments[1];
         options = null;
       }
@@ -58,11 +59,11 @@ export default function (region) {
       options.uri = config.uri.LEAGUE_BY_TEAM;
       options.id = teamId;
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getChallenger: function (type, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
+    getChallenger(type, options, callback) {
+      if (arguments.length === 2 && _.isFunction(options)) {
         callback = arguments[1];
         options = null;
       }
@@ -74,7 +75,7 @@ export default function (region) {
         type: type || 'RANKED_SOLO_5x5'
       };
 
-      util.exec(options, callback);
+      return exec(options);
     }
   };
 

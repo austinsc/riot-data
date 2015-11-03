@@ -1,16 +1,9 @@
+import config from '../config';
+import {exec} from '../util';
+
 export default function (region) {
-  'use strict';
-
-  var config = require('../config');
-  var util = require('../util');
-
   return {
-    get: function (shardName, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    get(shardName, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATUS_SHARD_ID;
@@ -18,23 +11,17 @@ export default function (region) {
       options.useHttp = true;
       options.host = 'http://status.leagueoflegends.com';
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getAll: function (options, callback) {
-      if (arguments.length === 1 && typeof options === 'function') {
-        callback = arguments[0];
-        options = null;
-      }
-
+    getAll(options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.STATUS_SHARD_LIST;
       options.useHttp = true;
       options.host = 'http://status.leagueoflegends.com';
 
-      util.exec(options, callback);
+      return exec(options);
     }
   };
-
 };

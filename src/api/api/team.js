@@ -1,52 +1,33 @@
+import config from '../config';
+import {exec} from '../util';
+
 export default function (region) {
-  'use strict';
-
-  var config = require('../config');
-  var util = require('../util');
-
   return {
-    get: function (teamId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    get(teamId, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.TEAM_ID;
       options.id = teamId;
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getByTeamId: function (teamId, options, callback) {
-      console.log(teamId);
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    getByTeamId(teamId, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.TEAM_ID;
       options.id = teamId;
 
-      util.exec(options, callback);
+      return exec(options);
     },
 
-    getBySummonerId: function (summonerId, options, callback) {
-      if (arguments.length === 2 && typeof options === 'function') {
-        callback = arguments[1];
-        options = null;
-      }
-
+    getBySummonerId(summonerId, options) {
       options = options || {};
       options.region = options.region || region || config.defaultRegion;
       options.uri = config.uri.TEAM_BY_SUMMONER;
       options.id = summonerId;
 
-      util.exec(options, callback);
+      return exec(options);
     }
   };
-
 };

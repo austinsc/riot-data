@@ -1,18 +1,17 @@
-export default function (apiKey, region, options) {
-  'use strict';
+import config from './config';
+import {setApiKey, setDefaultRateLimit, enableRedis, setCacheTTL, setRateLimit} from './util';
 
-  var config = require('./config');
-  var util = require('./util');
 
-  util.setApiKey(apiKey);
-  util.setDefaultRateLimit();
+export default function(apiKey, region, options) {
+  setApiKey(apiKey);
+  setDefaultRateLimit();
 
-  if (options) {
-    if (options.useRedis) {
-      util.enableRedis(options.port, options.host, options.options);
+  if(options) {
+    if(options.useRedis) {
+      enableRedis(options.port, options.host, options.options);
     }
-    if (options.cacheTTL) {
-      util.setCacheTTL(options.cacheTTL);
+    if(options.cacheTTL) {
+      setCacheTTL(options.cacheTTL);
     }
   }
 
@@ -31,10 +30,9 @@ export default function (apiKey, region, options) {
   api.Summoner = require('./api/summoner')(region);
   api.Team = require('./api/team')(region);
 
-  api.setRateLimit = function (limitPer10s, limitPer10min) {
-    util.setRateLimit(limitPer10s, limitPer10min);
+  api.setRateLimit = function(limitPer10s, limitPer10min) {
+    setRateLimit(limitPer10s, limitPer10min);
   };
 
   return api;
-
 };

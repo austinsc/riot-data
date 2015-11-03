@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Q from 'q';
 import https from 'https';
 import mongodb from 'mongodb';
-import lolapi from 'lolapi';
+import lolapi from './api/lolapi';
 import {inspect} from 'util';
 import prettyjson from 'prettyjson';
 

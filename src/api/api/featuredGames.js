@@ -1,3 +1,4 @@
+import _ from 'lodash';
 export default function (region) {
   'use strict';
 
@@ -5,8 +6,8 @@ export default function (region) {
   var util = require('../util');
 
   return {
-    get: function (options, callback) {
-      if (arguments.length === 1 && typeof options === 'function') {
+    get(options, callback) {
+      if (arguments.length === 1 && _.isFunction(options)) {
         callback = arguments[0];
         options = null;
       }
@@ -16,7 +17,7 @@ export default function (region) {
       options.uri = config.uri.FEATURED_GAMES;
       options.endpoint = 'api.pvp.net';
 
-      util.exec(options, callback);
+      return exec(options);
     }
   };
 
