@@ -1,4 +1,4 @@
-import {SUMMONER_ID, SUMMONER_BY_NAME, SUMMONER_NAME, SUMMONER_RUNES, SUMMONER_MASTERIES} from '../../Constants';
+import {SUMMONER_ID, SUMMONER_BY_NAME, SUMMONER_NAME, SUMMONER_RUNES, SUMMONER_MASTERIES} from '../Constants';
 
 export const Summoner = {
   get(summonerIds, options = {}) {

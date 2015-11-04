@@ -1,4 +1,4 @@
-import {CHAMPION_ID, CHAMPION_LIST} from '../../Constants';
+import {CHAMPION_ID, CHAMPION_LIST} from '../Constants';
 
 export const Champion = {
   get(championId, options) {

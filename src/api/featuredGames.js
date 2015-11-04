@@ -1,4 +1,4 @@
-import {FEATURED_GAMES} from '../../Constants';
+import {FEATURED_GAMES} from '../Constants';
 
 export const FeaturedGames = {
   get(options = {}) {

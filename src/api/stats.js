@@ -1,4 +1,4 @@
-import {RANKED_STATS, STAT_SUMMARY} from '../../Constants';
+import {RANKED_STATS, STAT_SUMMARY} from '../Constants';
 
 export const Stats = {
   getRanked(summonerId, options = {}) {

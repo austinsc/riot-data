@@ -11,7 +11,7 @@ import {
   STATIC_SUMMONER_SPELL_ID,
   STATIC_REALM,
   STATIC_VERSIONS
-} from '../../Constants';
+} from '../Constants';
 
 export const Static = {
   getChampions(options = {}) {

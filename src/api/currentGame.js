@@ -1,4 +1,4 @@
-import {CURRENT_GAME, PLATFORMS} from '../../Constants';
+import {CURRENT_GAME, PLATFORMS} from '../Constants';
 
 export const CurrentGame = {
   getBySummonerId(summonerId, options = {}) {

@@ -1,4 +1,4 @@
-import {STATUS_SHARD_ID, STATUS_SHARD_LIST} from '../../Constants';
+import {STATUS_SHARD_ID, STATUS_SHARD_LIST} from '../Constants';
 
 export const Status = {
   get(shardName, options = {}) {

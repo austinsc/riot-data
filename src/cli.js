@@ -16,4 +16,7 @@ const config = rc('riot-data', {region, apikey, mongodb, logger: new Logdown({pr
 var rito = new RiotAccess(config);
 rito.start()
   .then(() => process.exit(0))
-  .catch(config.logger.error);
+  .catch(err => {
+    config.logger.error(err);
+    process.exit(0);
+  });

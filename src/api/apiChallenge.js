@@ -1,4 +1,4 @@
-import {API_CHALLENGE} from '../../Constants';
+import {API_CHALLENGE} from '../Constants';
 
 export const ApiChallenge = {
   get(timestamp, options = {}) {

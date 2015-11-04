@@ -1,4 +1,4 @@
-import {MATCH_HISTORY} from '../../Constants';
+import {MATCH_HISTORY} from '../Constants';
 
 export const MatchHistory = {
   getBySummonerId(summonerId, options = {}) {

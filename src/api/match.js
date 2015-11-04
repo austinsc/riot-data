@@ -1,4 +1,4 @@
-import {MATCH} from '../../Constants';
+import {MATCH} from '../Constants';
 
 export const Match = {
   get(matchId, options = {}) {

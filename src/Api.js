@@ -1,14 +1,14 @@
 import _ from 'lodash';
 import redis from 'redis';
-import config from './config';
-import RateLimiter from './rateLimiter';
-import {isInteger, fillUri} from '../utilities';
+import RateLimiter from './RateLimiter';
+import {isInteger, fillUri} from './utilities';
 import * as api from './api/index';
+import * as defaults from './defaults';
 
 
 export default class Api {
   constructor(options = {}) {
-    options = _.merge(config, options);
+    options = _.defaults(options, defaults);
     if(!options.apikey || !_.isString(options.apikey)) {
       throw new Error('Invalid API key: ' + apikey);
     }
@@ -29,7 +29,7 @@ export default class Api {
 
   exec(options) {
     try {
-      console.log(options.uri = this.craftUri(options));
+      options.uri = this.craftUri(options);
     } catch(error) {
       return new Promise((resolve, reject) => reject(error));
     }
@@ -54,49 +54,26 @@ export default class Api {
   }
 
   request(options) {
-    return new Promise((resolve, reject) => {
-      if(!options.uri || typeof options.uri !== 'string') {
-        return reject(new Error('Invalid URI: ' + options.uri));
-      }
+    console.log('requesting...');
+    if(!options.uri || !_.isString(options.uri)) {
+      return new Promise((resolve, reject) => reject(new Error('Invalid URI: ' + options.uri)));
+    }
 
-      if(this._useRedis) {
-        this._redisClient.get(options.uri, (error, results) => {
-          if(!error && results) {
-            try {
-              return resolve(JSON.parse(results));
-            } catch(err) {
-              this._redisClient.del(options.uri);
-              return reject(err);
+    if(options.static) {
+      return this._get(options);
+    } else {
+      console.log('scheduling');
+      return new Promise((resolve, reject) =>
+        this.schedule((done) => {
+          this._get(options).then(...args => {
+            if(done) {
+              done();
             }
-          }
-          if(options.static) {
-            this._get(options).then(resolve, reject);
-          } else {
-            this.schedule((done) => {
-              this._get(options).then(...args => {
-                if(done){
-                  done();
-                }
-                resolve(...args);
-              }, reject);
-            });
-          }
-        });
-      } else {
-        if(options.static) {
-          this._get(options).then(resolve, reject);
-        } else {
-          this.schedule((done) => {
-            this._get(options).then(...args => {
-              if(done){
-                done();
-              }
-              resolve(...args);
-            }, reject);
-          });
-        }
-      }
-    });
+            resolve(...args);
+          }, reject);
+        })
+      );
+    }
   }
 
   schedule(fn) {
@@ -115,6 +92,7 @@ export default class Api {
   }
 
   _get(options) {
+    console.log('getting...');
     return new Promise((resolve, reject) => {
       const protocol = options.useHttp ? http : https;
       let data = '';

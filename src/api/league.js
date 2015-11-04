@@ -1,4 +1,4 @@
-import {LEAGUE_BY_SUMMONER_FULL, LEAGUE_BY_SUMMONER, LEAGUE_BY_TEAM_FULL, LEAGUE_BY_TEAM, CHALLENGER_LEAGUE} from '../../Constants';
+import {LEAGUE_BY_SUMMONER_FULL, LEAGUE_BY_SUMMONER, LEAGUE_BY_TEAM_FULL, LEAGUE_BY_TEAM, CHALLENGER_LEAGUE} from '../Constants';
 
 export const League = {
   getBySummonerId(summonerId, options) {

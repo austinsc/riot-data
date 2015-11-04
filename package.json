@@ -24,7 +24,9 @@
     "redis": "^2.3.0"
   },
   "devDependencies": {
-    "babel": "^5.8.29"
+    "babel": "^5.8.29",
+    "chai": "^3.4.0",
+    "mocha": "^2.3.3"
   },
   "babel": {
     "modules": "common",
