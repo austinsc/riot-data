@@ -1,9 +1,12 @@
+import http from 'http';
+import https from 'https';
 import _ from 'lodash';
 import redis from 'redis';
 import RateLimiter from './RateLimiter';
 import {isInteger, fillUri} from './utilities';
 import * as api from './api/index';
 import * as defaults from './defaults';
+
 
 
 export default class Api {
@@ -24,7 +27,7 @@ export default class Api {
       }
     }
 
-    _.keys(api).forEach(a => this[a] = _.mapValues(api[a], (v, k) => _.wrap(v, (x, ...args) => this.exec(_.merge(x(...args), {region: options.region})))));
+    _.keys(api).forEach(a => this[a] = _.mapValues(api[a], (v, k) => _.wrap(v, (x, ...args) => this.exec(_.defaults(x(...args), options)))));
   }
 
   exec(options) {
@@ -48,8 +51,7 @@ export default class Api {
       throw new Error('Invalid API URI: ' + options.uri);
     }
 
-    var endpoint = options.endpoint || config.endpoint;
-    var host = options.host || 'https://' + (options.static ? 'global' : options.region) + '.' + endpoint;
+    const host = options.host || 'https://' + (options.static ? 'global' : options.region) + '.' + options.endpoint;
     return `${host}${fillUri(options)}?api_key=${this._apikey}${_.map(options.query, (v, k) => `&${k}=${v}`)}`;
   }
 
@@ -62,9 +64,10 @@ export default class Api {
     if(options.static) {
       return this._get(options);
     } else {
-      console.log('scheduling');
+      console.log('scheduling...');
       return new Promise((resolve, reject) =>
         this.schedule((done) => {
+          console.log('scheduled!');
           this._get(options).then(...args => {
             if(done) {
               done();
@@ -77,8 +80,8 @@ export default class Api {
   }
 
   schedule(fn) {
-    this._limiterPer10s.schedule(function(done1) {
-      this._limiterPer10min.schedule(function(done2) {
+    this._limiterPer10s.schedule((done1) => {
+      this._limiterPer10min.schedule((done2) => {
         fn(function() {
           if(done1) {
             done1();
@@ -99,40 +102,31 @@ export default class Api {
 
       protocol.get(options.uri, function(response) {
         const contentType = response.headers['content-type'];
-
-        response.on('data', function(chunk) {
-          data += chunk;
-        });
-
-        response.on('error', function(error) {
-          reject(error);
-        });
-
-        response.on('end', function() {
+        response.on('data', chunk => data += chunk);
+        response.on('error', error => reject(error));
+        response.on('end', () => {
           if(contentType.indexOf('application/json') === -1) {
-            return reject(response.statusCode + ' API failed to return JSON content');
+            reject(response.statusCode + ' API failed to return JSON content');
+            return;
           }
 
           if(!data) {
-            return resolve(null);
+            resolve(null);
+            return;
           }
 
           let parsed;
           try {
             parsed = JSON.parse(data);
           } catch(error) {
-            return reject('Unable to parse data received from the server');
+            reject('Unable to parse data received from the server');
+            return;
           }
 
           if(parsed.status && parsed.status.message !== 200) {
-            return reject(`${parsed.status.status_code} ${parsed.status.message}`);
+            reject(`${parsed.status.status_code} ${parsed.status.message}`);
           } else {
-            if(this._useRedis || options.cacheRequest) {
-              redis.set(options.uri, data);
-              this._redisClient.expire(options.uri, this._cacheTTL);
-            }
-
-            return resolve(parsed);
+            resolve(parsed);
           }
         });
       });

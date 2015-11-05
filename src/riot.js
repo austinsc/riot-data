@@ -72,8 +72,7 @@ export default class RiotAccess extends Api {
     //  .then(_print)
     //  .then(data => Q.all(data.entries.filter((x, i) => i < 5).map(x => Q.nfcall(this.api.Team.get, x.playerOrTeamId))))
     //  .then(_print);
-    return this.Team.get('TEAM-ba6b55b0-d284-11e4-971b-c81f66ddabda')
-      .then(_print);
+    return this.Team.get('TEAM-ba6b55b0-d284-11e4-971b-c81f66ddabda');
 
   }
 
