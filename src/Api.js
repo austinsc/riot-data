@@ -2,11 +2,10 @@ import http from 'http';
 import https from 'https';
 import _ from 'lodash';
 import redis from 'redis';
-import RateLimiter from './RateLimiter';
+import {RateLimit} from 'ratelimit.js';
 import {isInteger, fillUri} from './utilities';
 import * as api from './api/index';
 import * as defaults from './defaults';
-
 
 
 export default class Api {
@@ -15,19 +14,17 @@ export default class Api {
     if(!options.apikey || !_.isString(options.apikey)) {
       throw new Error('Invalid API key: ' + apikey);
     }
+    this._logger = options.logger;
     this._apikey = options.apikey;
-    this._limiterPer10s = new RateLimiter(options.limitPer10s, 10 * 1000);
-    this._limiterPer10min = new RateLimiter(options.limitPer10min, 10 * 60 * 1000);
-    this._cacheTTL = options.cacheTTL;
-    if(this._useRedis = options.useRedis) {
-      if(options.port && options.host) {
-        this._redisClient = redis.createClient.apply(this, arguments);
-      } else {
-        this._redisClient = redis.createClient();
-      }
-    }
-
+    this._region = options.region;
     _.keys(api).forEach(a => this[a] = _.mapValues(api[a], (v, k) => _.wrap(v, (x, ...args) => this.exec(_.defaults(x(...args), options)))));
+
+    const client = redis.createClient();
+    const rules = [
+      {interval: 10 * 60 * 1000, limit: options.limitPer10min},
+      {interval: 10 * 1000, limit: options.limitPer10s}
+    ];
+    this._limiter = new RateLimit(client, rules, {prefix: 'RiotAPI'})
   }
 
   exec(options) {
@@ -56,7 +53,6 @@ export default class Api {
   }
 
   request(options) {
-    console.log('requesting...');
     if(!options.uri || !_.isString(options.uri)) {
       return new Promise((resolve, reject) => reject(new Error('Invalid URI: ' + options.uri)));
     }
@@ -64,38 +60,28 @@ export default class Api {
     if(options.static) {
       return this._get(options);
     } else {
-      console.log('scheduling...');
-      return new Promise((resolve, reject) =>
-        this.schedule((done) => {
-          console.log('scheduled!');
-          this._get(options).then(...args => {
-            if(done) {
-              done();
-            }
-            resolve(...args);
-          }, reject);
-        })
-      );
+      return this.schedule(this._get.bind(this, options));
     }
   }
 
   schedule(fn) {
-    this._limiterPer10s.schedule((done1) => {
-      this._limiterPer10min.schedule((done2) => {
-        fn(function() {
-          if(done1) {
-            done1();
-          }
-          if(done2) {
-            done2();
-          }
-        });
-      });
+    return new Promise((resolve, reject) => {
+      const rateLimitWrapper = (err, isRateLimited) => {
+        if(err) {
+          this._logger.log('Error: ' + err);
+          reject(err);
+        }
+        if(isRateLimited) {
+          return this.schedule(fn);
+        } else {
+          resolve(fn());
+        }
+      };
+      this._limiter.incr(this._region, 1, rateLimitWrapper);
     });
   }
 
   _get(options) {
-    console.log('getting...');
     return new Promise((resolve, reject) => {
       const protocol = options.useHttp ? http : https;
       let data = '';
@@ -109,24 +95,10 @@ export default class Api {
             reject(response.statusCode + ' API failed to return JSON content');
             return;
           }
-
-          if(!data) {
-            resolve(null);
-            return;
-          }
-
-          let parsed;
           try {
-            parsed = JSON.parse(data);
+            resolve(JSON.parse(data));
           } catch(error) {
             reject('Unable to parse data received from the server');
-            return;
-          }
-
-          if(parsed.status && parsed.status.message !== 200) {
-            reject(`${parsed.status.status_code} ${parsed.status.message}`);
-          } else {
-            resolve(parsed);
           }
         });
       });

@@ -32,12 +32,12 @@ describe('Api', function() {
     expect(api.ApiChallenge.get()).to.be.an.instanceOf(Promise);
   });
 
-  it('Returns a result from the api module functions.', function(done) {
+  it('Returns a result from the promise.', function(done) {
     const api = new Api();
     api.Team.get('TEAM-ba6b55b0-d284-11e4-971b-c81f66ddabda')
       .then(res => {
-        console.dir(res);
         expect(res).to.not.be.empty;
+        console.dir(res);
         done();
       })
       .catch(done);
