@@ -25,11 +25,16 @@ const argv = optimist
 const config = rc('riot-data', {...defaults, logger: new Logdown({prefix: 'riot-data'})}, argv);
 
 var rito = new RiotAccess(config);
-rito.start()
-  .then(print)
-  .then(() => process.exit(0))
-  .catch(err => {
-    config.logger.error(err.stack || err);
 
-    process.exit(0);
-  });
+async function main() {
+  try{
+    await rito.start();
+  } catch(err) {
+    config.logger.error(err.stack || err);
+  }
+
+  config.logger.info('Peace out.');
+  process.exit(0);
+}
+
+main();

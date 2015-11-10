@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import prettyjson from 'prettyjson';
 
 export function isInteger(value) {
   return +value === (value | 0);
@@ -47,6 +48,7 @@ export function fillUri(options) {
   return options.uri;
 }
 
-export function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+export function print(data) {
+  console.log(prettyjson.render(data));
+  return data;
 }

@@ -12,6 +12,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "babel-polyfill": "^6.0.16",
     "cfonts": "0.0.13",
     "lodash": "^3.10.1",
     "logdown": "^1.2.4",
@@ -23,7 +24,8 @@
     "q": "^1.4.1",
     "ratelimit.js": "^1.7.0",
     "rc": "^1.1.2",
-    "redis": "^2.3.0"
+    "redis": "^2.3.0",
+    "superagent": "^1.4.0"
   },
   "devDependencies": {
     "babel": "^5.8.29",

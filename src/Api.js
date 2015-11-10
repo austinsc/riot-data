@@ -1,11 +1,11 @@
-import http from 'http';
-import https from 'https';
+import PromiseMaker from './PromiseMaker';
 import _ from 'lodash';
 import redis from 'redis';
 import {RateLimit} from 'ratelimit.js';
-import {isInteger, fillUri} from './utilities';
+import {isInteger, fillUri, print} from './utilities';
 import * as api from './api/index';
 import * as defaults from './defaults';
+import request from 'superagent';
 
 
 export default class Api {
@@ -53,6 +53,9 @@ export default class Api {
   }
 
   request(options) {
+    this._logger.info(`requesting...`);
+    print(options);
+
     if(!options.uri || !_.isString(options.uri)) {
       return new Promise((resolve, reject) => reject(new Error('Invalid URI: ' + options.uri)));
     }
@@ -68,7 +71,7 @@ export default class Api {
     return new Promise((resolve, reject) => {
       const rateLimitWrapper = (err, isRateLimited) => {
         if(err) {
-          this._logger.log('Error: ' + err);
+          this._logger.error('Error: ' + err);
           reject(err);
         }
         if(isRateLimited) {
@@ -82,26 +85,33 @@ export default class Api {
   }
 
   _get(options) {
-    return new Promise((resolve, reject) => {
-      const protocol = options.useHttp ? http : https;
-      let data = '';
-
-      protocol.get(options.uri, function(response) {
-        const contentType = response.headers['content-type'];
-        response.on('data', chunk => data += chunk);
-        response.on('error', error => reject(error));
-        response.on('end', () => {
-          if(contentType.indexOf('application/json') === -1) {
-            reject(response.statusCode + ' API failed to return JSON content');
-            return;
-          }
-          try {
-            resolve(JSON.parse(data));
-          } catch(error) {
-            reject('Unable to parse data received from the server');
-          }
-        });
-      });
-    });
+    this._logger.log('getting');
+    return request.get(options.uri)
+      .use(PromiseMaker)
+      .promise();
   }
+
+  //_get(options) {
+  //  return new Promise((resolve, reject) => {
+  //    const protocol = options.useHttp ? http : https;
+  //    let data = '';
+  //
+  //    protocol.get(options.uri, function(response) {
+  //      const contentType = response.headers['content-type'];
+  //      response.on('data', chunk => data += chunk);
+  //      response.on('error', error => reject(error));
+  //      response.on('end', () => {
+  //        if(contentType.indexOf('application/json') === -1) {
+  //          reject(response.statusCode + ' API failed to return JSON content');
+  //          return;
+  //        }
+  //        try {
+  //          resolve(JSON.parse(data));
+  //        } catch(error) {
+  //          reject('Unable to parse data received from the server');
+  //        }
+  //      });
+  //    });
+  //  });
+  //}
 }
